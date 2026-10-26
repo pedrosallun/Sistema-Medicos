@@ -1,40 +1,58 @@
-# Publicação no Railway
+# Elo no Railway
 
-## Estado verificado
+## Implantação
 
-O código foi enviado ao GitHub, branch `main`. Não houve criação de projeto, serviço ou banco no Railway.
+- Workspace: **thiagomagha's Projects** (`98721d4d-f350-4504-8a39-81f7d75619e8`).
+- Projeto novo: **elo-preconsulta** (`5fbf1377-fb6f-42ad-9e40-70be6fb1d825`).
+- Ambiente: **production** (`80d527f3-1882-4e76-a16e-dd87d7669dc1`).
+- Aplicação: **elo-web** (`0f95e80c-576c-436c-b3c6-9438d0780c93`).
+- Banco: **Postgres** (`89e7b2c6-746d-4b68-a10e-701a1b0593d0`), criado pelo template oficial PostgreSQL do Railway, com volume persistente.
+- Site: https://elo-web-production-30c7.up.railway.app
+- Dashboard: https://railway.com/project/5fbf1377-fb6f-42ad-9e40-70be6fb1d825
+- Fonte: `pedrosallun/Sistema-Medicos`, branch `main`.
 
-Em 26/10/2026, a investigação usou a CLI oficial `5.71.0`, seu código-fonte público e a documentação oficial de autenticação. A CLI atual usa **`https://backboard.railway.com/graphql/v2`**. O domínio `.app` usado inicialmente é um endpoint anterior; o endpoint atual também foi testado.
+Não criar outro projeto para atualizar esta instalação. O serviço foi conectado diretamente ao GitHub. Alterações na branch configurada podem disparar novos deploys. O `Dockerfile` usa Node 22, e `railway.json` define o health check `/api/health`.
 
-Resultados com a credencial recebida, sem registrá-la no repositório:
+## Acesso e configuração
 
-| Verificação | Resultado |
-| --- | --- |
-| `RAILWAY_API_TOKEN` + `railway whoami --json` | Unauthorized |
-| `RAILWAY_TOKEN` + `railway status --json` | Invalid RAILWAY_TOKEN |
-| Bearer + `apiToken { workspaces { id name } }` | Not Authorized |
-| Cabeçalho Project-Access-Token + `projectToken` | Project Token not found / CLI Invalid RAILWAY_TOKEN |
+Consulte **Variables** do serviço **elo-web** para o login inicial: `ADMIN_EMAIL` e `ADMIN_PASSWORD`. A senha foi gerada aleatoriamente e não consta no repositório. Não a exponha em issues ou logs.
 
-`whoami` sozinho não determina validade de tokens restritos a workspace: a consulta `me` é de conta pessoal. Por isso foi consultado também `apiToken`, que identifica o contexto de tokens de conta/workspace. Esse teste também foi recusado. Não é possível identificar o workspace ou criar recursos com os acessos observados.
+Configuração existente:
 
-A próxima informação útil é a tela de origem da chave (token de conta/workspace, token de projeto ou identificador) e o link/ID do workspace do Thiago. Não enviar valores de segredos em commits ou issues. Se uma nova credencial for necessária, fornecê-la por configuração segura.
+- `NODE_ENV=production`;
+- `DATABASE_URL`: referência a `${{Postgres.DATABASE_URL}}`, pela rede privada;
+- `PORT=3000`, alinhada à porta de destino do domínio;
+- `DATA_ENCRYPTION_KEY`: chave aleatória de 32 bytes, em hexadecimal;
+- `ADMIN_EMAIL` e `ADMIN_PASSWORD`: criação do administrador inicial;
+- `ENABLE_AI=false`: nenhuma chamada externa de IA habilitada.
 
-## Fluxo quando a autenticação estiver resolvida
+Não altere a chave de criptografia de um banco existente sem migração: os dados gravados dependem dela. Alterar `ADMIN_PASSWORD` em Variables não troca a senha do usuário já criado no banco. Recuperação e troca de senha pela interface permanecem como evolução pendente.
 
-1. Validar o token de conta/workspace no endpoint atual e confirmar o ID do workspace.
-2. Criar **um projeto novo**, sem reutilizar nem alterar outros projetos do Thiago.
-3. Adicionar o PostgreSQL oficial pelo catálogo do Railway.
-4. Adicionar um serviço conectado a `pedrosallun/Sistema-Medicos`, branch `main`. O repositório já fornece `Dockerfile` e `railway.json`.
-5. Configurar `DATABASE_URL` com referência à rede privada do PostgreSQL, `NODE_ENV=production`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` e `DATA_ENCRYPTION_KEY`, conforme o README. Não incluir credenciais no código. Guardar senha e chave no cofre/configurações do Railway. OpenAI é opcional e não bloqueia esse deploy.
-6. Publicar, acompanhar o build até concluir e gerar domínio HTTPS para o serviço da aplicação.
-7. Validar `/api/health`, login com cookie Secure e a jornada completa com dados fictícios. Confirmar também a persistência após reinício do serviço.
+## Validação
 
-A CLI oferece `railway init --name elo-preconsulta --workspace <ID> --json` para criação e `railway up --detach --json` para upload local. Também permite conectar a fonte GitHub com `railway service source connect --repo pedrosallun/Sistema-Medicos --branch main --service <SERVICO>`. Não executar criação novamente sem checar o resultado da tentativa anterior: isso evita projetos duplicados.
+O Railway concluiu o build Docker e os deploys da aplicação e do PostgreSQL. O teste pela URL pública confirmou:
 
-## Fontes oficiais consultadas
+- HTTPS e `/api/health` com banco acessível;
+- bloqueio de consulta clínica anônima;
+- login administrativo com cookie Secure;
+- cadastro e geração do link individual;
+- questionário com oito perguntas, envio e cálculo de perfil;
+- preservação da preferência de não receber contato;
+- bloqueio da reutilização do link;
+- acompanhamento interno e auditoria.
 
-- https://docs.railway.com/integrations/api
-- https://github.com/railwayapp/cli/blob/master/src/client.rs
-- https://github.com/railwayapp/cli/blob/master/src/config.rs
+A aplicação foi reiniciada, e o teste confirmou a persistência e a leitura das respostas criptografadas e do acompanhamento. O registro fictício foi excluído ao final, e a sessão de teste foi encerrada. Não foram cadastrados pacientes reais.
 
-Esses arquivos documentam a separação: `RAILWAY_API_TOKEN` usa `Authorization: Bearer`; `RAILWAY_TOKEN` usa `Project-Access-Token`. Um token limitado a um projeto existente não autoriza, por si só, criar um projeto novo em outro workspace.
+## Manutenção
+
+Acompanhe cada deploy até `SUCCESS`; upload ou início de build não prova prontidão. Em caso de falha, consulte os logs do serviço sem imprimir valores de variáveis. O resumo estruturado funciona sem OpenAI; ativação opcional e limitações estão no README. WhatsApp não está integrado.
+
+Antes de uso clínico real, finalize as definições de privacidade e retenção descritas no README, valide o questionário e configure/teste backups e restauração do PostgreSQL com guarda separada da chave.
+
+## Autenticação de operação
+
+A CLI oficial utiliza `https://backboard.railway.com/graphql/v2`. `RAILWAY_API_TOKEN` usa `Authorization: Bearer`; `RAILWAY_TOKEN` usa `Project-Access-Token` para tokens de projeto. O token de conta fornecido posteriormente autenticou e permitiu criar os recursos acima. Nenhum token de Railway foi salvo no código ou nas variáveis da aplicação.
+
+`whoami` sozinho não valida tokens restritos a workspace. Para esses tokens, consulte `apiToken { workspaces { id name } }`. Preserve o acesso ao workspace correto ao operar a instalação.
+
+Fontes oficiais: https://docs.railway.com/integrations/api e https://github.com/railwayapp/cli.

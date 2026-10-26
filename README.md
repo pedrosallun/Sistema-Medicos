@@ -45,9 +45,15 @@ O teste de navegador usa Chromium em `/usr/bin/chromium`; ajuste `playwright.con
 
 ## Railway — projeto novo no workspace do Thiago
 
-O código está publicado em [pedrosallun/Sistema-Medicos](https://github.com/pedrosallun/Sistema-Medicos), branch `main`. O projeto Railway ainda **não foi criado**. Consulte `docs/railway.md` para o procedimento e o diagnóstico de autenticação confirmado com a CLI oficial.
+O código está publicado em [pedrosallun/Sistema-Medicos](https://github.com/pedrosallun/Sistema-Medicos), branch `main`. A aplicação foi publicada no projeto **elo-preconsulta**, no workspace **thiagomagha's Projects**.
 
-Quando houver acesso válido:
+- Aplicação: https://elo-web-production-30c7.up.railway.app
+- Projeto: https://railway.com/project/5fbf1377-fb6f-42ad-9e40-70be6fb1d825
+- Login administrativo: consulte `ADMIN_EMAIL` e `ADMIN_PASSWORD` em Variables do serviço `elo-web`.
+
+Consulte `docs/railway.md` para o estado da implantação e os passos de manutenção.
+
+Para reproduzir em outro projeto:
 
 1. Autenticar com uma credencial de conta/workspace capaz de **criar projetos** no workspace do Thiago. Token limitado a um projeto existente não atende esse objetivo. Confirmar o workspace pelo ID, não apenas pelo nome.
 2. Criar um projeto novo, por exemplo `elo-preconsulta`, nesse workspace, e adicionar PostgreSQL.
@@ -58,7 +64,7 @@ Quando houver acesso válido:
    - `ADMIN_EMAIL`: e-mail do primeiro administrador;
    - `ADMIN_PASSWORD`: senha exclusiva com pelo menos 12 caracteres;
    - `DATA_ENCRYPTION_KEY`: 32 bytes aleatórios em hexadecimal (64 caracteres). Gerar e guardar em cofre seguro; não publicar no repositório;
-   - `PORT`: fornecido automaticamente pelo Railway.
+   - `PORT=3000`: alinhado à porta de destino do domínio público.
 5. Gerar domínio HTTPS, verificar `/api/health`, entrar com o administrador e repetir o fluxo com paciente fictício. O cookie de sessão é Secure em produção e exige HTTPS.
 6. Habilitar backups do PostgreSQL e guardar a chave separadamente. Testar restauração antes de dados reais. Não utilizar volume SQLite em produção.
 
@@ -76,4 +82,6 @@ Configure `AI_API_KEY` por canal seguro e `ENABLE_AI=true` somente após a clín
 
 ## Resultado da validação nesta entrega
 
-Oito testes de lógica/API passaram com SQLite e com PostgreSQL local. O teste completo em Chromium passou, incluindo viewport móvel de 390 px. A auditoria npm não apontou vulnerabilidades conhecidas em dependências de produção. A OpenAI foi validada com fornecedor simulado, sem credencial real. O deploy Docker/Railway não foi executado: a autenticação da conta foi recusada.
+Oito testes de lógica/API passaram com SQLite e com PostgreSQL local. O teste completo em Chromium passou, incluindo viewport móvel de 390 px. A auditoria npm não apontou vulnerabilidades conhecidas em dependências de produção. A OpenAI foi validada com fornecedor simulado, sem credencial real. O build Docker e o deploy Railway foram concluídos. O teste em produção confirmou HTTPS, saúde do banco, login e cookie Secure, bloqueio de acesso anônimo, cadastro, questionário, perfil, link de uso único, acompanhamento e auditoria.
+
+Também foi confirmada a persistência das respostas e acompanhamentos após reinício da aplicação no Railway; o registro fictício foi removido ao final.
