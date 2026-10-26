@@ -56,3 +56,13 @@ A CLI oficial utiliza `https://backboard.railway.com/graphql/v2`. `RAILWAY_API_T
 `whoami` sozinho não valida tokens restritos a workspace. Para esses tokens, consulte `apiToken { workspaces { id name } }`. Preserve o acesso ao workspace correto ao operar a instalação.
 
 Fontes oficiais: https://docs.railway.com/integrations/api e https://github.com/railwayapp/cli.
+
+## Demonstração separada
+
+- Serviço `elo-demo` (`191a4e03-4316-49ac-b758-2730db133612`).
+- URL: https://elo-demo-production.up.railway.app
+- Acesso público: `teste@gmail.com` / `teste123`.
+- `DEMO_MODE=true`, `PORT=3000`, `NODE_ENV=production`, `ENABLE_AI=false`.
+- SQLite em memória, chave efêmera e exemplos fictícios recriados no reinício. Não conecta ao PostgreSQL nem chama provedores de IA.
+
+O serviço clínico `elo-web` continua usando PostgreSQL e seu administrador original. Para Claude no serviço clínico, informe `ANTHROPIC_API_KEY` em Variables de `elo-web`. O modelo configurado é `claude-sonnet-4-6`.

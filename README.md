@@ -102,6 +102,8 @@ Também foi confirmada a persistência das respostas e acompanhamentos após rei
 
 ## Versão de demonstração
 
+Demo pública: **https://elo-demo-production.up.railway.app**
+
 O serviço separado `elo-demo` usa `DEMO_MODE=true` e banco SQLite exclusivamente em memória, mesmo que uma `DATABASE_URL` esteja presente. Ele não conecta ao PostgreSQL da clínica, usa chave de criptografia efêmera e não chama IA externa. Oito pacientes fictícios (seis pré-consultas concluídas, duas pendentes), perfis, objetivos, eventos e históricos são recriados a cada reinício. Não cadastre informações reais.
 
 Acesso público solicitado: **teste@gmail.com** / **teste123**. Essas credenciais só são criadas no modo de demonstração. O serviço clínico mantém seu administrador e banco existentes. A interface mostra um aviso de demonstração. Alterações e sessões da demo são descartadas quando o processo reinicia.
