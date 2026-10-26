@@ -45,7 +45,7 @@ O teste de navegador usa Chromium em `/usr/bin/chromium`; ajuste `playwright.con
 
 ## Railway — projeto novo no workspace do Thiago
 
-O projeto remoto ainda **não foi criado**: a credencial fornecida foi recusada pela API do Railway, como token de conta e como token de projeto. Nenhuma publicação foi realizada.
+O código está publicado em [pedrosallun/Sistema-Medicos](https://github.com/pedrosallun/Sistema-Medicos), branch `main`. O projeto Railway ainda **não foi criado**. Consulte `docs/railway.md` para o procedimento e o diagnóstico de autenticação confirmado com a CLI oficial.
 
 Quando houver acesso válido:
 
