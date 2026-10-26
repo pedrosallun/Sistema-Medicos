@@ -1,6 +1,6 @@
 # Elo — Pré-consulta de Ortopedia
 
-MVP da especificação da Clínica de Ortopedia (Raíssa e Glauber). Aplicação Node.js com interface responsiva em português e PostgreSQL em produção. Não contém pacientes de demonstração nem credenciais padrão de produção.
+MVP da especificação da Clínica de Ortopedia (Raíssa e Glauber). Aplicação Node.js com interface responsiva em português e PostgreSQL em produção. O serviço clínico não contém credenciais padrão. Há um modo de demonstração isolado, com dados fictícios e acesso público de teste.
 
 ## O que está implementado
 
@@ -16,7 +16,7 @@ MVP da especificação da Clínica de Ortopedia (Raíssa e Glauber). Aplicação
 - Administração cadastra usuários, consulta auditoria e exclui registros mediante confirmação.
 - Criptografia AES-256-GCM dos dados de pacientes, respostas e acompanhamentos. Senhas com bcrypt; tokens armazenados por hash. Proteção de origem nas mutações, cookies HttpOnly/SameSite, limitação de requisições e cabeçalhos de segurança.
 
-A aplicação usa um resumo determinístico e o identifica assim na interface. **OpenAI é uma integração opcional, desativada por padrão e ainda sem validação ao vivo por falta de credencial.** WhatsApp não está integrado. Na configuração padrão, não envia informações a esses fornecedores. O teste das cores é uma versão inicial experimental criada para o MVP; não é instrumento validado nem diagnóstico. Precisa de validação da clínica antes de implantação assistencial.
+A aplicação usa um resumo determinístico e o identifica assim na interface. **Claude (Anthropic) é uma integração opcional, ainda sem validação ao vivo por falta de credencial.** WhatsApp não está integrado. Na configuração padrão, não envia informações a esses fornecedores. O teste das cores é uma versão inicial experimental criada para o MVP; não é instrumento validado nem diagnóstico. Precisa de validação da clínica antes de implantação assistencial.
 
 ## Desenvolvimento
 
@@ -74,14 +74,36 @@ O PostgreSQL usa a rede privada do Railway. Não desabilite a verificação TLS 
 
 É uma implementação técnica inicial, não uma declaração de conformidade LGPD. Antes de pacientes reais, a clínica deve definir controlador/canal de direitos, bases legais, política de retenção, fornecedores e contratos, permissões de cada profissional e validar o questionário. Hoje a retenção é até exclusão administrativa; não há expurgo programado. O aviso informa essa limitação. O registro de exclusão permanece sem as respostas clínicas na auditoria.
 
-Permanecem para as fases seguintes: ativação e validação ao vivo da OpenAI, WhatsApp Business, lembretes automáticos, edição/versionamento de perguntas pelo administrador, templates configuráveis, recuperação/troca/revogação de usuários, integração de agenda, NPS, comparecimento e relatórios avançados. O painel só apresenta indicadores que os dados atuais permitem calcular. Os históricos de resposta são preservados por pré-consulta; novos atendimentos geram novos registros, sem sobrescrever o anterior.
+Permanecem para as fases seguintes: ativação e validação ao vivo do Claude, WhatsApp Business, lembretes automáticos, edição/versionamento de perguntas pelo administrador, templates configuráveis, recuperação/troca/revogação de usuários, integração de agenda, NPS, comparecimento e relatórios avançados. O painel só apresenta indicadores que os dados atuais permitem calcular. Os históricos de resposta são preservados por pré-consulta; novos atendimentos geram novos registros, sem sobrescrever o anterior.
 
-## OpenAI opcional
+## Claude (Anthropic) opcional
 
-Configure `AI_API_KEY` por canal seguro e `ENABLE_AI=true` somente após a clínica avaliar o fornecedor e as bases legais. Opcional: `AI_MODEL` (padrão `gpt-4.1-mini`). O painel oferece geração manual de rascunho para revisão humana. A requisição omite os campos de identificação/agendamento e pede para não incluir identificadores presentes no texto livre; textos abertos podem ainda conter dados identificáveis e devem ser avaliados pela clínica. O fornecedor recebe relatos de saúde. O aviso do formulário se ajusta à ativação. `store:false` solicita não persistir o resultado como objeto de chat; não equivale a um contrato de retenção zero. Falhas da API preservam o resumo estruturado. Não há chamadas de IA automáticas nem uso para diagnóstico ou prescrição.
+No Railway, abra o projeto **elo-preconsulta** → serviço **elo-web** → **Variables** e adicione `ANTHROPIC_API_KEY` com sua chave da API Anthropic. Use uma chave criada no [console da Anthropic](https://console.anthropic.com/); a assinatura do aplicativo Claude é separada da API. Não coloque a chave no frontend, no GitHub ou no chat.
+
+Configuração do backend:
+
+```text
+ANTHROPIC_API_KEY=<preencher somente nas variáveis seguras do Railway>
+ENABLE_AI=true
+AI_MODEL=claude-sonnet-4-6
+```
+
+Depois de salvar, aplique/deploy as alterações no Railway. O código só habilita IA quando `ENABLE_AI=true` e a chave existe. O serviço foi preparado com ativação e modelo acima; a chave ainda precisa ser informada pelo usuário. O painel oferece **Gerar rascunho com Claude** nos questionários elegíveis. É uma operação manual com revisão humana, sem geração de diagnósticos ou prescrições.
+
+A integração usa a API Messages da Anthropic com ferramenta de saída estruturada, limites de tamanho, timeout e validação. A requisição omite os campos de identificação/agendamento. Textos abertos podem conter dados identificáveis e devem ser avaliados pela clínica. O fornecedor recebe relatos de saúde; avalie as bases legais e o contrato antes de ativar para pacientes reais.
+
+O aviso do formulário identifica a Anthropic quando a integração está ativa. Questionários anteriores, sem o aviso desse fornecedor, permanecem bloqueados para IA. Colete uma nova pré-consulta com o aviso atualizado. Falhas da API preservam as respostas e o resumo estruturado. A integração foi testada com respostas simuladas; a validação real depende da chave e do crédito/permissão para o modelo na conta Anthropic.
 
 ## Resultado da validação nesta entrega
 
-Oito testes de lógica/API passaram com SQLite e com PostgreSQL local. O teste completo em Chromium passou, incluindo viewport móvel de 390 px. A auditoria npm não apontou vulnerabilidades conhecidas em dependências de produção. A OpenAI foi validada com fornecedor simulado, sem credencial real. O build Docker e o deploy Railway foram concluídos. O teste em produção confirmou HTTPS, saúde do banco, login e cookie Secure, bloqueio de acesso anônimo, cadastro, questionário, perfil, link de uso único, acompanhamento e auditoria.
+A suíte inicial de oito testes passou com SQLite e PostgreSQL local; a adaptação para Claude acrescenta testes de protocolo, saída inválida e aviso por fornecedor. O teste completo em Chromium passou, incluindo viewport móvel de 390 px. A auditoria npm não apontou vulnerabilidades conhecidas em dependências de produção. O Claude foi validado com fornecedor simulado, sem credencial real. O build Docker e o deploy Railway foram concluídos. O teste em produção confirmou HTTPS, saúde do banco, login e cookie Secure, bloqueio de acesso anônimo, cadastro, questionário, perfil, link de uso único, acompanhamento e auditoria.
 
 Também foi confirmada a persistência das respostas e acompanhamentos após reinício da aplicação no Railway; o registro fictício foi removido ao final.
+
+## Versão de demonstração
+
+O serviço separado `elo-demo` usa `DEMO_MODE=true` e banco SQLite exclusivamente em memória, mesmo que uma `DATABASE_URL` esteja presente. Ele não conecta ao PostgreSQL da clínica, usa chave de criptografia efêmera e não chama IA externa. Oito pacientes fictícios (seis pré-consultas concluídas, duas pendentes), perfis, objetivos, eventos e históricos são recriados a cada reinício. Não cadastre informações reais.
+
+Acesso público solicitado: **teste@gmail.com** / **teste123**. Essas credenciais só são criadas no modo de demonstração. O serviço clínico mantém seu administrador e banco existentes. A interface mostra um aviso de demonstração. Alterações e sessões da demo são descartadas quando o processo reinicia.
+
+Para testar localmente: `DEMO_MODE=true PORT=3001 node server.js`. Não ative esse modo no serviço clínico; ele inicia uma sessão de demonstração em memória, sem consultar os dados persistentes.

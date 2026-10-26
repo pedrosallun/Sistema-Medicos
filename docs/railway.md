@@ -24,7 +24,7 @@ Configuração existente:
 - `PORT=3000`, alinhada à porta de destino do domínio;
 - `DATA_ENCRYPTION_KEY`: chave aleatória de 32 bytes, em hexadecimal;
 - `ADMIN_EMAIL` e `ADMIN_PASSWORD`: criação do administrador inicial;
-- `ENABLE_AI=false`: nenhuma chamada externa de IA habilitada.
+- `ENABLE_AI=true` e `AI_MODEL=claude-sonnet-4-6`: serviço preparado para Claude. A integração só fica ativa após cadastro de `ANTHROPIC_API_KEY`.
 
 Não altere a chave de criptografia de um banco existente sem migração: os dados gravados dependem dela. Alterar `ADMIN_PASSWORD` em Variables não troca a senha do usuário já criado no banco. Recuperação e troca de senha pela interface permanecem como evolução pendente.
 
@@ -45,7 +45,7 @@ A aplicação foi reiniciada, e o teste confirmou a persistência e a leitura da
 
 ## Manutenção
 
-Acompanhe cada deploy até `SUCCESS`; upload ou início de build não prova prontidão. Em caso de falha, consulte os logs do serviço sem imprimir valores de variáveis. O resumo estruturado funciona sem OpenAI; ativação opcional e limitações estão no README. WhatsApp não está integrado.
+Acompanhe cada deploy até `SUCCESS`; upload ou início de build não prova prontidão. Em caso de falha, consulte os logs do serviço sem imprimir valores de variáveis. O resumo estruturado funciona sem Claude; ativação opcional e limitações estão no README. WhatsApp não está integrado.
 
 Antes de uso clínico real, finalize as definições de privacidade e retenção descritas no README, valide o questionário e configure/teste backups e restauração do PostgreSQL com guarda separada da chave.
 
